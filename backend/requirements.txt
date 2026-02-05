@@ -1,6 +1,6 @@
 fastapi
 uvicorn
 python-dotenv
-sentence-transformers
+openai
 supabase
 tiktoken

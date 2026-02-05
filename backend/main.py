@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 import tiktoken
 import math
-from sentence_transformers import SentenceTransformer
 from supabase import create_client
 
 load_dotenv()
@@ -14,7 +13,6 @@ supabase = create_client(
     os.getenv("SUPABASE_ANON_KEY")
 )
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
 
 app = FastAPI()
 
@@ -40,8 +38,20 @@ def chunk_text(text: str, chunk_size=1000, overlap=120):
 
     return chunks
 
-def embed_text(texts):
-    return model.encode(texts).tolist()
+from openai import OpenAI
+
+client = OpenAI()
+
+def embed_text(chunks):
+    embeddings = []
+    for chunk in chunks:
+        response = client.embeddings.create(
+            model="text-embedding-3-small",
+            input=chunk
+        )
+        embeddings.append(response.data[0].embedding)
+    return embeddings
+
 
 def cosine_similarity(a, b):
     dot = sum(x*y for x, y in zip(a, b))
