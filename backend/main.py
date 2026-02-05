@@ -61,26 +61,25 @@ def cosine_similarity(a, b):
 
 @app.post("/ingest")
 def ingest(req: IngestRequest):
-    chunks = chunk_text(req.text)
-    embeddings = embed_text(chunks)
+    try:
+        chunks = chunk_text(req.text)
+        embeddings = embed_text(chunks)
 
-    rows = []
-    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-        rows.append({
-            "content": chunk,
-            "embedding": embedding,
-            "metadata": {
-                "source": "user_input",
-                "chunk_index": i
-            }
-        })
+        rows = []
+        for i, (chunk, emb) in enumerate(zip(chunks, embeddings)):
+            rows.append({
+                "content": chunk,
+                "embedding": emb,
+                "metadata": {"source": "user_input", "chunk_index": i}
+            })
 
-    supabase.table("documents").insert(rows).execute()
+        result = supabase.table("documents").insert(rows).execute()
+        return {"status": "ok", "rows": len(rows)}
 
-    return {
-        "status": "stored",
-        "chunks_saved": len(rows)
-    }
+    except Exception as e:
+        print("INGEST ERROR:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/query")
 def query_docs(req: QueryRequest):
