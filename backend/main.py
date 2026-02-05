@@ -41,7 +41,7 @@ def chunk_text(text: str, chunk_size=1000, overlap=120):
 import hashlib
 import numpy as np
 
-def fake_embedding(text, dim=1536):
+def fake_embedding(text, dim=384):
     h = hashlib.sha256(text.encode()).digest()
     vec = np.frombuffer(h, dtype=np.uint8).astype(float)
     vec = np.pad(vec, (0, dim - len(vec)))
