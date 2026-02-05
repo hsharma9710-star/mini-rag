@@ -38,23 +38,17 @@ def chunk_text(text: str, chunk_size=1000, overlap=120):
 
     return chunks
 
-from openai import OpenAI
-import os
+import hashlib
+import numpy as np
 
-client = OpenAI(
-    api_key=os.environ["OPENAI_API_KEY"]
-)
-
+def fake_embedding(text, dim=1536):
+    h = hashlib.sha256(text.encode()).digest()
+    vec = np.frombuffer(h, dtype=np.uint8).astype(float)
+    vec = np.pad(vec, (0, dim - len(vec)))
+    return vec.tolist()
 
 def embed_text(chunks):
-    embeddings = []
-    for chunk in chunks:
-        response = client.embeddings.create(
-            model="text-embedding-3-small",
-            input=chunk
-        )
-        embeddings.append(response.data[0].embedding)
-    return embeddings
+    return [fake_embedding(chunk) for chunk in chunks]
 
 
 def cosine_similarity(a, b):
