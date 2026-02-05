@@ -39,8 +39,12 @@ def chunk_text(text: str, chunk_size=1000, overlap=120):
     return chunks
 
 from openai import OpenAI
+import os
 
-client = OpenAI()
+client = OpenAI(
+    api_key=os.environ["OPENAI_API_KEY"]
+)
+
 
 def embed_text(chunks):
     embeddings = []
